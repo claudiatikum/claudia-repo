@@ -1,0 +1,90 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "",
+    "Metadata": {
+    },
+    "Parameters": {"myvpccidr": {
+        "Description": "-choose vpc cidr",
+        "Type": "String"
+      },
+      
+        "pubsubcidr": {
+            "Description": "For public subnet",
+            "Type": "String"
+      },
+    "prisubcidr": {
+        "Description": "choose prisubcidr",
+        "Type": "String"
+    }
+  },
+    "Mappings": {
+
+    },
+    "Conditions": {
+
+    },
+    "Resources": {"myappvpc": {
+      "Type": "AWS::EC2::VPC",
+      "Properties": {
+        "CidrBlock": { "Ref": "myvpccidr" },
+        "Tags": [{ "Key": "Name", "Value":  "myappvpc" }]
+      }
+    },
+    "pubsub": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "AvailabilityZone": "us-east-2b",
+        "VpcId": { "Ref": "myappvpc" },
+        "CidrBlock": { "Ref": "pubsubcidr" },
+        "Tags": [{ "Key": "Name", "Value":  "pubsub" }]
+      }
+    },
+    "prisub": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "AvailabilityZone": "us-east-2a",
+        "VpcId": { "Ref": "myappvpc" },
+        "CidrBlock": { "Ref": "prisubcidr" },
+        "Tags": [{ "Key": "Name", "Value":  "prisub" }]
+      }
+    },
+    "myappigw": {
+      "Type": "AWS::EC2::InternetGateway",
+      "Properties": {
+        "Tags": [{ "Key": "Name", "Value":  "myappigw" }]
+      }
+    },
+    "AttachGateway": {
+      "Type": "AWS::EC2::VPCGatewayAttachment",
+      "Properties": {
+        "VpcId": { "Ref": "myappvpc" },
+        "InternetGatewayId": { "Ref": "myappigw" }
+      }
+    },
+    "myappvpcrtb": {
+      "Type": "AWS::EC2::RouteTable",
+      "Properties": {
+        "VpcId": { "Ref": "myappvpc" },
+        "Tags": [{ "Key": "Name", "Value":  "myappvpcrtb" }]
+      }
+    },
+    "myappvpcrt": {
+      "Type": "AWS::EC2::Route",
+      "Properties": {
+        "RouteTableId": { "Ref": "myappvpcrtb" },
+        "DestinationCidrBlock": "0.0.0.0/0",
+        "GatewayId": { "Ref": "myappigw" }
+      }
+    },
+    "pubsubass": {
+      "Type": "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties": {
+        "SubnetId": { "Ref": "pubsub" },
+        "RouteTableId": { "Ref": "myappvpcrtb" }
+      }
+    }
+  },
+    "Outputs": {
+
+    }
+}
